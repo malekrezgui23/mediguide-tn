@@ -1,0 +1,17 @@
+# Q1 · Quelles substances actives ont le plus de médicaments ?
+# Utilité : voir où le choix est le plus large, donc où un patient a le plus de chances de trouver moins cher.
+# Paramètres : aucun (la limite est appliquée par le web service).
+# Renvoie : la substance, son nombre de médicaments et de laboratoires.
+# Sans inférence : aucun résultat, car med:contientSubstance n'est jamais écrite (R2).
+# Endpoint : /substances/top
+PREFIX med:  <http://mediguide-tn.org/vocab#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?substance ?nom (COUNT(DISTINCT ?medicament) AS ?nbMedicaments) (COUNT(DISTINCT ?laboratoire) AS ?nbLaboratoires)
+WHERE {
+    ?medicament med:contientSubstance ?substance ;
+                med:fabriquePar ?laboratoire .
+    ?substance foaf:name ?nom .
+}
+GROUP BY ?substance ?nom
+ORDER BY DESC(?nbMedicaments) ?nom

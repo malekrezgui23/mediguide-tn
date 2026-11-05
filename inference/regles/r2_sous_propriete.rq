@@ -1,0 +1,11 @@
+# R2 (cours, partie « Inférence ») : si p(x,y) et p sous-propriété de q, alors q(x,y).
+# Exemple : medd:medicament-x med:substanceUnique medd:substance-paracetamol
+#           + med:substanceUnique rdfs:subPropertyOf med:contientSubstance
+#           => medd:medicament-x med:contientSubstance medd:substance-paracetamol
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT { ?x ?q ?y }
+WHERE {
+    ?x ?p ?y .
+    ?p rdfs:subPropertyOf ?q .
+}

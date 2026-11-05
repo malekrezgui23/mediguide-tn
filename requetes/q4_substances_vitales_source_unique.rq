@@ -1,0 +1,21 @@
+# Q4 · Quelles substances d'un médicament vital ne dépendent que d'un seul laboratoire ?
+# Utilité : repérer le risque de rupture le plus grave (si ce laboratoire s'arrête, il n'y a plus d'alternative).
+# Paramètres : aucun. Renvoie : la substance, son unique laboratoire, la liste de ses médicaments.
+# Sans inférence : aucun résultat, car med:contientSubstance n'est jamais écrite (R2).
+# Endpoint : /substances/source-unique
+PREFIX med:  <http://mediguide-tn.org/vocab#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?substance ?nom (SAMPLE(?nomLaboratoire) AS ?laboratoire) (GROUP_CONCAT(DISTINCT ?nomMedicament; separator=", ") AS ?medicaments)
+WHERE {
+    ?vital med:niveauVEIC "Vital" ;
+           med:contientSubstance ?substance .
+    ?substance foaf:name ?nom .
+    ?medicament med:contientSubstance ?substance ;
+                foaf:name ?nomMedicament ;
+                med:fabriquePar ?labo .
+    ?labo foaf:name ?nomLaboratoire .
+}
+GROUP BY ?substance ?nom
+HAVING (COUNT(DISTINCT ?labo) = 1)
+ORDER BY ?nom

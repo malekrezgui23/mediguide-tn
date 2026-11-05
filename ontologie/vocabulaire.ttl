@@ -1,0 +1,187 @@
+# Vocabulaire RDFS de MédiGuide TN (contrat 1 de PLAN.md)
+# 13 classes, 15 propriétés à nous + 3 propriétés réutilisées (foaf:name, dcterms:date, schema:identifier)
+
+@prefix med:     <http://mediguide-tn.org/vocab#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix schema:  <https://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# Classes : les médicaments (hiérarchie sur 3 niveaux + schema:Drug)
+# ---------------------------------------------------------------------------
+
+med:Medicament a rdfs:Class ;
+    rdfs:subClassOf schema:Drug ;
+    rdfs:label "Médicament"@fr ;
+    rdfs:comment "Un médicament autorisé en Tunisie (un numéro d'AMM)."@fr .
+
+med:Princeps a rdfs:Class ;
+    rdfs:subClassOf med:Medicament ;
+    rdfs:label "Princeps"@fr ;
+    rdfs:comment "Le médicament d'origine."@fr .
+
+med:MedicamentCopie a rdfs:Class ;
+    rdfs:subClassOf med:Medicament ;
+    rdfs:label "Médicament copie"@fr ;
+    rdfs:comment "Une copie d'un médicament d'origine."@fr .
+
+med:Generique a rdfs:Class ;
+    rdfs:subClassOf med:MedicamentCopie ;
+    rdfs:label "Générique"@fr ;
+    rdfs:comment "Copie d'un médicament chimique."@fr .
+
+med:Biosimilaire a rdfs:Class ;
+    rdfs:subClassOf med:MedicamentCopie ;
+    rdfs:label "Biosimilaire"@fr ;
+    rdfs:comment "Copie d'un médicament biologique."@fr .
+
+# ---------------------------------------------------------------------------
+# Classes : les laboratoires
+# ---------------------------------------------------------------------------
+
+med:Laboratoire a rdfs:Class ;
+    rdfs:subClassOf foaf:Organization ;
+    rdfs:label "Laboratoire"@fr ;
+    rdfs:comment "Le laboratoire titulaire de l'AMM."@fr .
+
+med:LaboratoireTunisien a rdfs:Class ;
+    rdfs:subClassOf med:Laboratoire ;
+    rdfs:label "Laboratoire tunisien"@fr ;
+    rdfs:comment "Laboratoire implanté en Tunisie, filiales de groupes étrangers comprises."@fr .
+
+med:LaboratoireEtranger a rdfs:Class ;
+    rdfs:subClassOf med:Laboratoire ;
+    rdfs:label "Laboratoire étranger"@fr ;
+    rdfs:comment "Laboratoire sans implantation en Tunisie."@fr .
+
+# ---------------------------------------------------------------------------
+# Classes : le reste du modèle
+# ---------------------------------------------------------------------------
+
+med:SubstanceActive a rdfs:Class ;
+    rdfs:label "Substance active"@fr ;
+    rdfs:comment "Une substance active, désignée par sa DCI (paracétamol, amoxicilline…)."@fr .
+
+med:Forme a rdfs:Class ;
+    rdfs:label "Forme galénique"@fr ;
+    rdfs:comment "La forme du médicament (comprimé, sirop, collyre…)."@fr .
+
+med:ClasseTherapeutique a rdfs:Class ;
+    rdfs:label "Classe thérapeutique"@fr ;
+    rdfs:comment "Une grande classe de médicaments (système nerveux, système cardiovasculaire…)."@fr .
+
+med:SousClasseTherapeutique a rdfs:Class ;
+    rdfs:label "Sous-classe thérapeutique"@fr ;
+    rdfs:comment "Un type de médicaments à l'intérieur d'une classe (analgésiques, antibactériens…)."@fr .
+
+med:Pharmacie a rdfs:Class ;
+    rdfs:subClassOf schema:Pharmacy ;
+    rdfs:label "Pharmacie"@fr ;
+    rdfs:comment "Une officine et son stock (pharmacie fictive pour la démonstration)."@fr .
+
+# ---------------------------------------------------------------------------
+# Propriétés : la substance (une propriété générale, deux sous-propriétés)
+# ---------------------------------------------------------------------------
+
+med:contientSubstance a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range med:SubstanceActive ;
+    rdfs:label "contient la substance"@fr ;
+    rdfs:comment "Le médicament contient cette substance, seule ou en association. Jamais écrite dans les données : déduite par R2."@fr .
+
+med:substanceUnique a rdf:Property ;
+    rdfs:subPropertyOf med:contientSubstance ;
+    rdfs:domain med:Medicament ;
+    rdfs:range med:SubstanceActive ;
+    rdfs:label "substance unique"@fr ;
+    rdfs:comment "Le médicament ne contient que cette substance active."@fr .
+
+med:substanceAssociee a rdf:Property ;
+    rdfs:subPropertyOf med:contientSubstance ;
+    rdfs:domain med:Medicament ;
+    rdfs:range med:SubstanceActive ;
+    rdfs:label "substance associée"@fr ;
+    rdfs:comment "Le médicament contient cette substance en association avec d'autres."@fr .
+
+# ---------------------------------------------------------------------------
+# Propriétés : les liens entre entités
+# ---------------------------------------------------------------------------
+
+med:fabriquePar a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range med:Laboratoire ;
+    rdfs:label "fabriqué par"@fr ;
+    rdfs:comment "Le laboratoire titulaire de l'AMM du médicament."@fr .
+
+med:aPourForme a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range med:Forme ;
+    rdfs:label "a pour forme"@fr ;
+    rdfs:comment "La forme galénique du médicament."@fr .
+
+med:aPourSousClasse a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range med:SousClasseTherapeutique ;
+    rdfs:label "a pour sous-classe"@fr ;
+    rdfs:comment "Le type de médicaments auquel il appartient."@fr .
+
+med:sousClasseDe a rdf:Property ;
+    rdfs:domain med:SousClasseTherapeutique ;
+    rdfs:range med:ClasseTherapeutique ;
+    rdfs:label "sous-classe de"@fr ;
+    rdfs:comment "La grande classe qui contient cette sous-classe."@fr .
+
+med:aEnStock a rdf:Property ;
+    rdfs:domain med:Pharmacie ;
+    rdfs:range med:Medicament ;
+    rdfs:label "a en stock"@fr ;
+    rdfs:comment "La pharmacie a ce médicament en stock."@fr .
+
+# ---------------------------------------------------------------------------
+# Propriétés : les valeurs
+# ---------------------------------------------------------------------------
+
+med:dosage a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:string ;
+    rdfs:label "dosage"@fr ;
+    rdfs:comment "Le dosage tel qu'il est écrit dans la liste des AMM."@fr .
+
+med:dosageNormalise a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:string ;
+    rdfs:label "dosage normalisé"@fr ;
+    rdfs:comment "Le dosage sous une écriture unique (1 g et 1000 MG donnent 1000mg), pour comparer les médicaments."@fr .
+
+med:codeComposition a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:string ;
+    rdfs:label "code de composition"@fr ;
+    rdfs:comment "Les substances du médicament, triées : même code = même composition exacte."@fr .
+
+med:presentation a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:string ;
+    rdfs:label "présentation"@fr ;
+    rdfs:comment "Le conditionnement vendu (B/30 = boîte de 30)."@fr .
+
+med:niveauVEIC a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:string ;
+    rdfs:label "niveau VEIC"@fr ;
+    rdfs:comment "L'importance du médicament : Vital, Essentiel, Intermédiaire ou Confort."@fr .
+
+med:prixPublic a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "prix public"@fr ;
+    rdfs:comment "Le prix public TTC d'une boîte, en dinars. Voir med:originePrix pour savoir s'il est réel ou estimé."@fr .
+
+med:originePrix a rdf:Property ;
+    rdfs:domain med:Medicament ;
+    rdfs:range xsd:string ;
+    rdfs:label "origine du prix"@fr ;
+    rdfs:comment "reel : prix de la liste PCT de juillet 2026 ; estime : prix calculé à partir des prix réels."@fr .

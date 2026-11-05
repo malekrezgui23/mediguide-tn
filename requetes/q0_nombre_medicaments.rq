@@ -1,0 +1,10 @@
+# Q0 · Combien de médicaments dans le guide ?
+# Utilité : montrer l'apport de l'inférence. Aucun médicament n'est écrit med:Medicament dans les données :
+# 0 sans inférence, tous avec (R1).
+# Paramètres : aucun. Endpoint : /statistiques/inference
+PREFIX med: <http://mediguide-tn.org/vocab#>
+
+SELECT (COUNT(DISTINCT ?medicament) AS ?nbMedicaments)
+WHERE {
+    ?medicament a med:Medicament .
+}

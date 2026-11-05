@@ -1,0 +1,36 @@
+# Q5 · Quels sont les équivalents de ce médicament, du moins cher au plus cher, et sont-ils en stock ?
+# Utilité : le cœur du guide. Le pharmacien n'a plus de Doliprane : il voit les équivalents qu'il a en stock.
+#          Le patient voit le générique moins cher ; l'économie en % est calculée en Python par le web service.
+# Équivalent = même composition exacte, même dosage, même forme.
+# Paramètres (initBindings) : ?medicament (obligatoire), ?pharmacie (ex. medd:pharmacie-demo)
+# Sans inférence : aucun résultat, car aucun médicament n'est écrit med:Medicament (R1).
+# Endpoint : /medicaments/{amm}/equivalents
+PREFIX med:  <http://mediguide-tn.org/vocab#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT DISTINCT ?equivalent ?nom ?dosage ?presentation ?nomLaboratoire ?origine ?prix ?originePrix ?enStock
+                ?nomReference ?prixReference ?presentationReference
+WHERE {
+    ?medicament foaf:name ?nomReference ;
+                med:prixPublic ?prixReference ;
+                med:codeComposition ?composition ;
+                med:dosageNormalise ?dose ;
+                med:aPourForme ?forme .
+    ?equivalent a med:Medicament ;
+                foaf:name ?nom ;
+                med:codeComposition ?composition ;
+                med:dosageNormalise ?dose ;
+                med:aPourForme ?forme ;
+                med:dosage ?dosage ;
+                med:fabriquePar ?laboratoire ;
+                med:prixPublic ?prix ;
+                med:originePrix ?originePrix .
+    ?laboratoire foaf:name ?nomLaboratoire ;
+                 a ?origine .
+    FILTER (?origine IN (med:LaboratoireTunisien, med:LaboratoireEtranger))
+    FILTER (?equivalent != ?medicament)
+    OPTIONAL { ?medicament med:presentation ?presentationReference }
+    OPTIONAL { ?equivalent med:presentation ?presentation }
+    OPTIONAL { ?pharmacie med:aEnStock ?equivalent . BIND(true AS ?enStock) }
+}
+ORDER BY ?prix ?nom

@@ -1,0 +1,30 @@
+# Q3 · Quelles sous-classes thérapeutiques n'ont aucun médicament d'un laboratoire tunisien ?
+# Utilité : l'analyste du ministère repère les types de médicaments qui dépendent uniquement de l'étranger.
+# Paramètres : aucun. Renvoie : la sous-classe, sa classe, le nombre de médicaments et de laboratoires étrangers.
+# Sans inférence : aucun résultat, car aucun médicament n'est écrit med:Medicament (R1).
+# Endpoint : /sous-classes/dependance-etranger
+PREFIX med:  <http://mediguide-tn.org/vocab#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?sousClasse ?nom ?nomClasse (COUNT(DISTINCT ?medicament) AS ?nbMedicaments) (COUNT(DISTINCT ?laboratoire) AS ?nbLaboratoires)
+WHERE {
+    {
+        # D'abord les sous-classes sans laboratoire tunisien (85 à tester), ensuite seulement leurs médicaments
+        SELECT ?sousClasse WHERE {
+            ?sousClasse a med:SousClasseTherapeutique .
+            FILTER NOT EXISTS {
+                ?autre med:aPourSousClasse ?sousClasse ;
+                       med:fabriquePar ?tunisien .
+                ?tunisien a med:LaboratoireTunisien .
+            }
+        }
+    }
+    ?medicament med:aPourSousClasse ?sousClasse ;
+                a med:Medicament ;
+                med:fabriquePar ?laboratoire .
+    ?sousClasse foaf:name ?nom ;
+                med:sousClasseDe ?classe .
+    ?classe foaf:name ?nomClasse .
+}
+GROUP BY ?sousClasse ?nom ?nomClasse
+ORDER BY DESC(?nbMedicaments) ?nom

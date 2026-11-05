@@ -1,0 +1,30 @@
+# Q2 · Quels médicaments contiennent cette substance, selon la forme, l'origine du laboratoire et le type,
+#      du moins cher au plus cher ?
+# Utilité : la recherche du pharmacien ou du patient (« les génériques tunisiens au paracétamol, en comprimé »).
+# Paramètres (liés par initBindings, tous facultatifs : une variable non liée accepte toutes les valeurs) :
+#   ?substance ex. medd:substance-paracetamol
+#   ?forme     ex. medd:forme-comprime
+#   ?origine   med:LaboratoireTunisien ou med:LaboratoireEtranger
+#   ?type      med:Generique, med:Biosimilaire, med:Princeps ou med:MedicamentCopie
+# Avec inférence : ?type = med:MedicamentCopie trouve génériques et biosimilaires (R1) ; ?substance trouve la
+# substance seule ET en association (R2). Sans inférence : aucun résultat.
+# Endpoint : /medicaments
+PREFIX med:  <http://mediguide-tn.org/vocab#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT DISTINCT ?medicament ?nom ?dosage ?nomForme ?presentation ?nomLaboratoire ?prix ?originePrix
+WHERE {
+    ?medicament a ?type ;
+                foaf:name ?nom ;
+                med:contientSubstance ?substance ;
+                med:aPourForme ?forme ;
+                med:fabriquePar ?laboratoire ;
+                med:prixPublic ?prix ;
+                med:originePrix ?originePrix .
+    ?forme foaf:name ?nomForme .
+    ?laboratoire a ?origine ;
+                 foaf:name ?nomLaboratoire .
+    OPTIONAL { ?medicament med:dosage ?dosage }
+    OPTIONAL { ?medicament med:presentation ?presentation }
+}
+ORDER BY ?prix ?nom
